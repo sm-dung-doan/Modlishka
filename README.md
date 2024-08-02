@@ -1,3 +1,5 @@
+# FOR EDUCATION PURPOSE
+
 # ..Modlishka..
 
 Modlishka is a powerful and flexible HTTP reverse proxy. It implements an entirely new and interesting approach of handling browser-based HTTP traffic flow, which allows it to transparently proxy multi-domain destination traffic, both TLS and non-TLS, over a single domain, without a requirement of installing any additional certificate on the client. What exactly does this mean? In short, it simply has a lot of potential, that can be used in many use case scenarios...
