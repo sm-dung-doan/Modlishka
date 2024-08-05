@@ -943,7 +943,7 @@ func (ld *loader) loadPackage(lpkg *loaderPackage) {
 			})
 
 			// If you see this error message, please file a bug.
-			log.Printf("internal error: error %q (%T) without position", err, err)
+			// log.Printf("internal error: error %q (%T) without position", err, err)
 		}
 
 		lpkg.Errors = append(lpkg.Errors, errs...)
@@ -1029,7 +1029,7 @@ func (ld *loader) loadPackage(lpkg *loaderPackage) {
 		if ipkg.Types != nil && ipkg.Types.Complete() {
 			return ipkg.Types, nil
 		}
-		log.Fatalf("internal error: package %q without types was imported from %q", path, lpkg)
+		//log.Fatalf("internal error: package %q without types was imported from %q", path, lpkg)
 		panic("unreachable")
 	})
 
@@ -1215,7 +1215,7 @@ func sameFile(x, y string) bool {
 // On success it sets lpkg.Types to a new Package.
 func (ld *loader) loadFromExportData(lpkg *loaderPackage) error {
 	if lpkg.PkgPath == "" {
-		log.Fatalf("internal error: Package %s has no PkgPath", lpkg)
+		//log.Fatalf("internal error: Package %s has no PkgPath", lpkg)
 	}
 
 	// Because gcexportdata.Read has the potential to create or
@@ -1309,7 +1309,7 @@ func (ld *loader) loadFromExportData(lpkg *loaderPackage) error {
 		viewLen++
 	}
 	if viewLen != len(view) {
-		log.Panicf("golang.org/x/tools/go/packages: unexpected new packages during load of %s", lpkg.PkgPath)
+		//log.Panicf("golang.org/x/tools/go/packages: unexpected new packages during load of %s", lpkg.PkgPath)
 	}
 
 	lpkg.Types = tpkg

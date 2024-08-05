@@ -16,11 +16,11 @@ package plugin
 
 import (
 	"encoding/json"
-	"github.com/drk1wi/Modlishka/config"
-	"github.com/drk1wi/Modlishka/log"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/drk1wi/Modlishka/config"
 )
 
 type ExtendedConfiguration struct {
@@ -47,7 +47,7 @@ func init() {
 
 			ct, err := os.Open(*config.JSONConfig)
 			if err != nil {
-				log.Errorf("Error opening JSON configuration (%s): %s", *config.JSONConfig, err)
+				//log.Errorf("Error opening JSON configuration (%s): %s", *config.JSONConfig, err)
 				return
 			}
 			defer ct.Close()
@@ -55,7 +55,7 @@ func init() {
 			ctb, _ := io.ReadAll(ct)
 			err = json.Unmarshal(ctb, &jsonConfig)
 			if err != nil {
-				log.Errorf("Error unmarshalling JSON configuration (%s): %s", *config.JSONConfig, err)
+				//log.Errorf("Error unmarshalling JSON configuration (%s): %s", *config.JSONConfig, err)
 				return
 			}
 		}
@@ -65,7 +65,7 @@ func init() {
 	s.HTTPRequest = func(req *http.Request, context *HTTPContext) {}
 
 	//process HTTP response (responses can arrive in random order)
-	s.HTTPResponse = func(resp *http.Response, context *HTTPContext,buffer *[]byte) {}
+	s.HTTPResponse = func(resp *http.Response, context *HTTPContext, buffer *[]byte) {}
 
 	// Register your http handlers
 	s.RegisterHandler = func(handler *http.ServeMux) {

@@ -2,11 +2,11 @@ package runtime
 
 import (
 	"encoding/base64"
-	"github.com/drk1wi/Modlishka/config"
-	"golang.org/x/net/publicsuffix"
-	"log"
 	"regexp"
 	"strings"
+
+	"github.com/drk1wi/Modlishka/config"
+	"golang.org/x/net/publicsuffix"
 )
 
 // compiled regexp
@@ -20,8 +20,7 @@ var (
 	RegexpSetCookie                      *regexp.Regexp
 )
 
-
-//runtime config
+// runtime config
 var (
 	ProxyDomain    string
 	TrackingCookie string
@@ -35,9 +34,9 @@ var (
 	JSInjectStrings   map[string]string
 	TargetResources   []string
 	TerminateTriggers []string
-	DynamicMode		  bool
-	ForceHTTPS		  bool
-	ForceHTTP		  bool
+	DynamicMode       bool
+	ForceHTTPS        bool
+	ForceHTTP         bool
 
 	//openssl rand -hex 32
 	RC4_KEY = `1b293b681a3edbfe60dee4051e14eeb81b293b681a3edbfe60dee4051e14eeb8`
@@ -75,12 +74,12 @@ func SetCoreRuntimeConfig(conf config.Options) {
 			res := strings.Split(val, ":")
 			decodedKey, err := base64.StdEncoding.DecodeString(res[0])
 			if err != nil {
-				log.Fatalf("Unable to decode parameter value %s . Terminating.", res[0])
+				//log.Fatalf("Unable to decode parameter value %s . Terminating.", res[0])
 			}
 
 			decodedValue, err := base64.StdEncoding.DecodeString(res[1])
 			if err != nil {
-				log.Fatalf("Unable to decode parameter value %s . Terminating.", res[1])
+				//log.Fatalf("Unable to decode parameter value %s . Terminating.", res[1])
 			}
 
 			ReplaceStrings[string(decodedKey)] = string(decodedValue)
@@ -93,7 +92,7 @@ func SetCoreRuntimeConfig(conf config.Options) {
 			res := strings.Split(val, ":")
 			decoded, err := base64.StdEncoding.DecodeString(res[1])
 			if err != nil {
-				log.Fatalf("Unable to decode parameter value %s", res[1])
+				//log.Fatalf("Unable to decode parameter value %s", res[1])
 			}
 			JSInjectStrings[res[0]] = string(decoded)
 		}
@@ -103,4 +102,3 @@ func SetCoreRuntimeConfig(conf config.Options) {
 	ForceHTTPS = *conf.ForceHTTPS
 	ForceHTTP = *conf.ForceHTTP
 }
-

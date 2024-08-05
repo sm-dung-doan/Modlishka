@@ -62,7 +62,7 @@ func main() {
 	// Open the data.db file. It will be created if it doesn't exist.
 	db, err := buntdb.Open("data.db")
 	if err != nil {
-		log.Fatal(err)
+		//Fatal(err)
 	}
 	defer db.Close()
 
@@ -573,10 +573,10 @@ To update the configuration you should call `ReadConfig` followed by `SetConfig`
 
 var config buntdb.Config
 if err := db.ReadConfig(&config); err != nil{
-	log.Fatal(err)
+	//log.Fatal(err)
 }
 if err := db.SetConfig(config); err != nil{
-	log.Fatal(err)
+	//log.Fatal(err)
 }
 ```
 

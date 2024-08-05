@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -634,7 +633,7 @@ func (state *golistState) createDriverResponse(words ...string) (*driverResponse
 
 		// Assume go list emits only absolute paths for Dir.
 		if p.Dir != "" && !filepath.IsAbs(p.Dir) {
-			log.Fatalf("internal error: go list returned non-absolute Package.Dir: %s", p.Dir)
+			//log.Fatalf("internal error: go list returned non-absolute Package.Dir: %s", p.Dir)
 		}
 
 		if p.Export != "" && !filepath.IsAbs(p.Export) {

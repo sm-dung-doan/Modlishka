@@ -397,7 +397,7 @@ func runCmdContext(ctx context.Context, cmd *exec.Cmd) (err error) {
 	// TODO(rfindley): per advice from bcmills@, it may be better to send SIGQUIT
 	// on certain platforms, such as unix.
 	if err := cmd.Process.Kill(); err != nil && !errors.Is(err, os.ErrProcessDone) && debug {
-		log.Printf("error killing the Go command: %v", err)
+		//log.Printf("error killing the Go command: %v", err)
 	}
 
 	return <-resChan
